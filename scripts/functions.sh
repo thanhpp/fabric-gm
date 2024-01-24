@@ -11,6 +11,8 @@ function filterExcludedAndGeneratedFiles {
         '^\.build/'
         '^build/'
         '^release/'
+        '^pkg/ccs-gm'
+        '^pkg/ecc'
         '(^|/)ci\.properties$'
         '(^|/)\.git/'
         '\.gen\.go$'

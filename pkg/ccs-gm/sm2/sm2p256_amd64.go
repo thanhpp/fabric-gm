@@ -20,7 +20,7 @@ import (
 	"crypto/elliptic"
 	"math/big"
 
-	"github.com/dustinxie/ecc"
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ecc"
 )
 
 type (

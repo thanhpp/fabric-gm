@@ -5,7 +5,6 @@
 package x509
 
 import (
-	"crypto/ecdh"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rsa"
@@ -121,16 +120,6 @@ func MarshalPKCS8PrivateKey(key interface{}) ([]byte, error) {
 	}
 
 	return asn1.Marshal(privKey)
-}
-
-// marshalECDHPrivateKey marshals an EC private key into ASN.1, DER format
-// suitable for NIST curves.
-func marshalECDHPrivateKey(key *ecdh.PrivateKey) ([]byte, error) {
-	return asn1.Marshal(ecPrivateKey{
-		Version:    1,
-		PrivateKey: key.Bytes(),
-		PublicKey:  asn1.BitString{Bytes: key.PublicKey().Bytes()},
-	})
 }
 
 // marshalECPrivateKeyWithOID marshals an EC private key into ASN.1, DER format and

@@ -110,12 +110,12 @@ func (s *Server) HandlerChain(h http.Handler, secure bool) http.Handler {
 // safe because ServeMux.Handle() is thread safe, and options are immutable.
 // This method can be called either before or after Server.Start(). If the
 // pattern exists the method panics.
-func (s *Server) RegisterHandler(pattern string, handler http.Handler, secure bool) {
+func (s *Server) RegisterHandler(pattern string, handler http.Handler, _ bool) {
 	s.mux.Handle(
 		pattern,
 		s.HandlerChain(
 			handler,
-			secure,
+			false,
 		),
 	)
 }

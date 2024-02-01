@@ -920,6 +920,7 @@ func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey
 		if sm2Sig.R.Sign() <= 0 || sm2Sig.S.Sign() <= 0 {
 			return errors.New("x509: sm2 signature contained zero or negative values")
 		}
+
 		if !sm2.Verify(pub, signed, sm2Sig.R, sm2Sig.S) {
 			return errors.New("x509: sm2 verification failure")
 		}

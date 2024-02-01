@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 
@@ -81,6 +82,7 @@ func executeForArgs(args []string) (output string, exit int, err error) {
 			return "", 1, fmt.Errorf("reading orderer CA certificate: %s", err)
 		}
 		if !caCertPool.AppendCertsFromPEM(caFilePEM) {
+			log.Println("error: failed to add ca-file PEM to cert pool", caFile)
 			return "", 1, fmt.Errorf("failed to add ca-file PEM to cert pool")
 		}
 

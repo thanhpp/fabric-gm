@@ -60,7 +60,7 @@ func (kg *sm2KeyGenerator) KeyGen(opts bccsp.KeyGenOpts) (bccsp.Key, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &sm2PrivateKey{priv}, nil
+	return &SM2PrivateKey{priv}, nil
 }
 
 type sm4KeyGenerator struct{}

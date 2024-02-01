@@ -67,7 +67,7 @@ func SignatureToLowS_SM2(k *sm2.PublicKey, signature []byte) ([]byte, error) {
 func IsLowS_SM2(k *sm2.PublicKey, s *big.Int) (bool, error) {
 	halfOrder, ok := curveHalfOrders[k.Curve]
 	if !ok {
-		return false, fmt.Errorf("curve not recognized [%s]", k.Curve)
+		return false, fmt.Errorf("IsLowS_SM2 curve not recognized [%+v]", k.Curve)
 	}
 
 	return s.Cmp(halfOrder) != 1, nil

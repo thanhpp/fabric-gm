@@ -8,6 +8,7 @@ package txvalidator
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"testing"
 
@@ -338,10 +339,12 @@ func TestGetTxCCInstance(t *testing.T) {
 	// setup the MSP manager so that we can sign/verify
 	err := msptesttools.LoadMSPSetupForTesting()
 	require.NoError(t, err)
-	cryptoProvider, err := sw.NewDefaultSecurityLevelWithKeystore(sw.NewDummyKeyStore())
+	cryptoProvider, err := sw.NewSM(256, "SHA2", sw.NewDummyKeyStore())
 	require.NoError(t, err)
 	signer, err := mspmgmt.GetLocalMSP(cryptoProvider).GetDefaultSigningIdentity()
 	require.NoError(t, err)
+
+	log.Println("signer", signer.GetIdentifier().Id)
 
 	channelID := "testchannelid"
 	upgradeCCName := "mycc"

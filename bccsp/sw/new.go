@@ -111,3 +111,63 @@ func NewWithParams(securityLevel int, hashFamily string, keyStore bccsp.KeyStore
 
 	return swbccsp, nil
 }
+
+// NewWithParams returns a new instance of the software-based BCCSP
+// set at the passed security level, hash family and KeyStore.
+func NewSM(securityLevel int, hashFamily string, keyStore bccsp.KeyStore) (bccsp.BCCSP, error) {
+	// Init config
+	conf := &config{}
+	err := conf.setSecurityLevel(securityLevel, hashFamily)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Failed initializing configuration at [%v,%v]", securityLevel, hashFamily)
+	}
+
+	swbccsp, err := New(keyStore)
+	if err != nil {
+		return nil, err
+	}
+
+	// Notice that errors are ignored here because some test will fail if one
+	// of the following call fails.
+
+	// Set the Encryptors
+	swbccsp.AddWrapper(reflect.TypeOf(&aesPrivateKey{}), &aescbcpkcs7Encryptor{})
+	swbccsp.AddWrapper(reflect.TypeOf(&sm4PrivateKey{}), &sm4Encryptor{})
+
+	// Set the Decryptors
+	swbccsp.AddWrapper(reflect.TypeOf(&aesPrivateKey{}), &aescbcpkcs7Decryptor{})
+	swbccsp.AddWrapper(reflect.TypeOf(&sm4PrivateKey{}), &sm4Decryptor{})
+
+	// Set the Signers
+	swbccsp.AddWrapper(reflect.TypeOf(&SM2PrivateKey{}), &sm2Signer{})
+
+	// Set the Verifiers
+	swbccsp.AddWrapper(reflect.TypeOf(&ecdsaPrivateKey{}), &ecdsaPrivateKeyVerifier{})
+	swbccsp.AddWrapper(reflect.TypeOf(&ecdsaPublicKey{}), &ecdsaPublicKeyKeyVerifier{})
+	swbccsp.AddWrapper(reflect.TypeOf(&SM2PrivateKey{}), &sm2PrivateKeyVerifier{})
+	swbccsp.AddWrapper(reflect.TypeOf(&SM2PublicKey{}), &sm2PublicKeyVerifier{})
+
+	// Set the Hashers
+	swbccsp.AddWrapper(reflect.TypeOf(&bccsp.SHAOpts{}), &hasher{hash: conf.hashFunction})
+	swbccsp.AddWrapper(reflect.TypeOf(&bccsp.SHA256Opts{}), &hasher{hash: sha256.New})
+	swbccsp.AddWrapper(reflect.TypeOf(&bccsp.SHA384Opts{}), &hasher{hash: sha512.New384})
+	swbccsp.AddWrapper(reflect.TypeOf(&bccsp.SHA3_256Opts{}), &hasher{hash: sha3.New256})
+	swbccsp.AddWrapper(reflect.TypeOf(&bccsp.SHA3_384Opts{}), &hasher{hash: sha3.New384})
+	swbccsp.AddWrapper(reflect.TypeOf(&bccsp.SM3Opts{}), &hasher{hash: sm3.New})
+
+	swbccsp.AddWrapper(reflect.TypeOf(&bccsp.SM2KeyGenOpts{}), &sm2KeyGenerator{})
+	swbccsp.AddWrapper(reflect.TypeOf(&bccsp.SM4KeyGenOpts{}), &sm4KeyGenerator{})
+
+	// Set the key deriver
+	swbccsp.AddWrapper(reflect.TypeOf(&SM2PrivateKey{}), &smKeyDeriver{})
+	swbccsp.AddWrapper(reflect.TypeOf(&SM2PublicKey{}), &smKeyDeriver{})
+	swbccsp.AddWrapper(reflect.TypeOf(&sm4PrivateKey{}), &smKeyDeriver{})
+
+	// Set the key importers
+	swbccsp.AddWrapper(reflect.TypeOf(&bccsp.X509PublicKeyImportOpts{}), &x509PublicKeyImportOptsKeyImporter{bccsp: swbccsp})
+	swbccsp.AddWrapper(reflect.TypeOf(&bccsp.SM2PrivateKeyImportOpts{}), &sm2PrivateKeyOptsKeyImporter{})
+	swbccsp.AddWrapper(reflect.TypeOf(&bccsp.SM2PublicKeyImportOpts{}), &sm2PublicKeyOptsKeyImporter{})
+	swbccsp.AddWrapper(reflect.TypeOf(&bccsp.SM4128ImportKeyOpts{}), &sm4ImportKeyOptsKeyImporter{})
+
+	return swbccsp, nil
+}

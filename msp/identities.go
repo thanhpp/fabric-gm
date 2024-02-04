@@ -12,6 +12,7 @@ import (
 	"encoding/hex"
 	"encoding/pem"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -135,6 +136,7 @@ func (id *identity) GetOrganizationalUnits() []*OUIdentifier {
 	}
 
 	var res []*OUIdentifier
+	log.Println("GetOrganizationalUnits id.cert.Subject.OrganizationalUnit", id.cert.Subject.OrganizationalUnit)
 	for _, unit := range id.cert.Subject.OrganizationalUnit {
 		res = append(res, &OUIdentifier{
 			OrganizationalUnitIdentifier: unit,

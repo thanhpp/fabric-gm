@@ -16,6 +16,8 @@ limitations under the License.
 package factory
 
 import (
+	"log"
+
 	"github.com/m4ru1/fabric-gm-bdais/bccsp"
 	"github.com/m4ru1/fabric-gm-bdais/bccsp/sw"
 	"github.com/pkg/errors"
@@ -44,6 +46,8 @@ func (f *SWFactory) Get(config *FactoryOpts) (bccsp.BCCSP, error) {
 	swOpts := config.SW
 
 	var ks bccsp.KeyStore
+	log.Println("swOpts.FileKeystore != nil", swOpts.FileKeystore != nil)
+
 	switch {
 	case swOpts.FileKeystore != nil:
 		fks, err := sw.NewFileBasedKeyStore(nil, swOpts.FileKeystore.KeyStorePath, false)

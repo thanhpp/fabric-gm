@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"hash"
 	"io"
+	"log"
 	"math/big"
 	"net"
 	"reflect"
@@ -1203,6 +1204,7 @@ func parseCertificate(in *certificate) (*Certificate, error) {
 	if out.PublicKeyAlgorithm == ECDSA && reflect.DeepEqual(params, in.TBSCertificate.PublicKey.Algorithm.Parameters.FullBytes) {
 		out.PublicKeyAlgorithm = SM2
 	}
+	log.Println("out.PublicKeyAlgorithm", out.PublicKeyAlgorithm)
 	var err error
 	out.PublicKey, err = parsePublicKey(out.PublicKeyAlgorithm, &in.TBSCertificate.PublicKey)
 	if err != nil {

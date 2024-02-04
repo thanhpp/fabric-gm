@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"text/template"
@@ -583,8 +584,9 @@ func generatePeerOrg(baseDir string, orgSpec OrgSpec) {
 }
 
 func copyAdminCert(usersDir, adminCertsDir, adminUserName string) error {
-	if _, err := os.Stat(filepath.Join(adminCertsDir,
-		adminUserName+"-cert.pem")); err == nil {
+	path := filepath.Join(adminCertsDir, adminUserName+"-cert.pem")
+	log.Println("copyAdminCert", path)
+	if _, err := os.Stat(path); err == nil {
 		return nil
 	}
 	// delete the contents of admincerts
@@ -597,9 +599,11 @@ func copyAdminCert(usersDir, adminCertsDir, adminUserName string) error {
 	if err != nil {
 		return err
 	}
-	err = copyFile(filepath.Join(usersDir, adminUserName, "msp", "signcerts",
-		adminUserName+"-cert.pem"), filepath.Join(adminCertsDir,
-		adminUserName+"-cert.pem"))
+	err = copyFile(
+		filepath.Join(usersDir, adminUserName, "msp", "signcerts",
+			adminUserName+"-cert.pem"),
+		filepath.Join(adminCertsDir,
+			adminUserName+"-cert.pem"))
 	if err != nil {
 		return err
 	}
@@ -609,6 +613,7 @@ func copyAdminCert(usersDir, adminCertsDir, adminUserName string) error {
 func generateNodes(baseDir string, nodes []NodeSpec, signCA *ca.CA, tlsCA *ca.CA, nodeType int, nodeOUs bool) {
 	for _, node := range nodes {
 		nodeDir := filepath.Join(baseDir, node.CommonName)
+		log.Println("generateNodes", node)
 		if _, err := os.Stat(nodeDir); os.IsNotExist(err) {
 			currentNodeType := nodeType
 			if node.isAdmin && nodeOUs {

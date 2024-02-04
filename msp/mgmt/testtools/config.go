@@ -23,6 +23,7 @@ func LoadMSPSetupForTesting() error {
 	if err != nil {
 		return err
 	}
+	log.Println("LoadMSPSetupForTesting", "dir", dir)
 
 	log.Println("load msp setup for testing", "conf", conf)
 

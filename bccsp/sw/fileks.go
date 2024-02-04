@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -124,6 +125,7 @@ func (ks *fileBasedKeyStore) GetKey(ski []byte) (bccsp.Key, error) {
 	}
 
 	suffix := ks.getSuffix(hex.EncodeToString(ski))
+	log.Println("GetKey suffix", suffix)
 
 	switch suffix {
 	case "key":
@@ -161,7 +163,11 @@ func (ks *fileBasedKeyStore) GetKey(ski []byte) (bccsp.Key, error) {
 			return nil, errors.New("public key type not recognized")
 		}
 	default:
-		return ks.searchKeystoreForSKI(ski)
+		k, err := ks.searchKeystoreForSKI(ski)
+
+		log.Println("searchKeystoreForSKI", k, err)
+
+		return k, err
 	}
 }
 
@@ -219,6 +225,8 @@ func (ks *fileBasedKeyStore) StoreKey(k bccsp.Key) (err error) {
 func (ks *fileBasedKeyStore) searchKeystoreForSKI(ski []byte) (k bccsp.Key, err error) {
 	files, _ := ioutil.ReadDir(ks.path)
 	for _, f := range files {
+		log.Println("searchKeystoreForSKI", f.Name())
+
 		if f.IsDir() {
 			continue
 		}
@@ -240,7 +248,10 @@ func (ks *fileBasedKeyStore) searchKeystoreForSKI(ski []byte) (k bccsp.Key, err 
 		switch kk := key.(type) {
 		case *ecdsa.PrivateKey:
 			k = &ecdsaPrivateKey{kk}
+		case *sm2.PrivateKey:
+			k = &SM2PrivateKey{kk}
 		default:
+			log.Printf("searchKeystoreForSKI kk %T", key)
 			continue
 		}
 

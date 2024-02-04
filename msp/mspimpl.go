@@ -12,6 +12,7 @@ import (
 	"encoding/asn1"
 	"encoding/hex"
 	"encoding/pem"
+	"log"
 	"strings"
 
 	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/x509"
@@ -133,6 +134,7 @@ func newBccspMsp(version MSPVersion, defaultBCCSP bccsp.BCCSP) (MSP, error) {
 		theMsp.internalSatisfiesPrincipalInternalFunc = theMsp.satisfiesPrincipalInternalV13
 		theMsp.internalSetupAdmin = theMsp.setupAdminsPreV142
 	case MSPv1_4_3:
+		log.Println("newBccspMsp", version)
 		theMsp.internalSetupFunc = theMsp.setupV142
 		theMsp.internalValidateIdentityOusFunc = theMsp.validateIdentityOUsV142
 		theMsp.internalSatisfiesPrincipalInternalFunc = theMsp.satisfiesPrincipalInternalV142
@@ -211,16 +213,22 @@ func (msp *bccspmsp) getSigningIdentityFromConf(sidInfo *m.SigningIdentityInfo) 
 		return nil, errors.New("getIdentityFromBytes error: nil sidInfo")
 	}
 
+	log.Println("getSigningIdentityFromConf sidInfo", sidInfo)
+
 	// Extract the public part of the identity
 	idPub, pubKey, err := msp.getIdentityFromConf(sidInfo.PublicSigner)
 	if err != nil {
 		return nil, err
 	}
 
+	log.Println("getSigningIdentityFromConf pubKey.SKI()", hex.EncodeToString(pubKey.SKI()))
+
 	// Find the matching private key in the BCCSP keystore
 	privKey, err := msp.bccsp.GetKey(pubKey.SKI())
 	// Less Secure: Attempt to import Private Key from KeyInfo, if BCCSP was not able to find the key
 	if err != nil {
+		log.Println("start getting SM Key")
+
 		mspLogger.Debugf("Could not find SKI [%s], trying KeyMaterial field: %+v\n", hex.EncodeToString(pubKey.SKI()), err)
 		if sidInfo.PrivateSigner == nil || sidInfo.PrivateSigner.KeyMaterial == nil {
 			return nil, errors.New("KeyMaterial not found in SigningIdentityInfo")
@@ -253,8 +261,11 @@ func (msp *bccspmsp) Setup(conf1 *m.MSPConfig) error {
 		return errors.New("Setup error: nil conf reference")
 	}
 
+	log.Println("bccspmsp.Setup", conf1)
+
 	// given that it's an msp of type fabric, extract the MSPConfig instance
 	conf := &m.FabricMSPConfig{}
+
 	err := proto.Unmarshal(conf1.Config, conf)
 	if err != nil {
 		return errors.Wrap(err, "failed unmarshalling fabric msp config")
@@ -301,6 +312,8 @@ func (msp *bccspmsp) GetDefaultSigningIdentity() (SigningIdentity, error) {
 	if msp.signer == nil {
 		return nil, errors.New("this MSP does not possess a valid default signing identity")
 	}
+
+	log.Println("GetDefaultSigningIdentity here", msp.signer.GetMSPIdentifier())
 
 	return msp.signer, nil
 }

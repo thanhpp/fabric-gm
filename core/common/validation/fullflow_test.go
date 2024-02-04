@@ -8,6 +8,7 @@ package validation
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"testing"
@@ -392,7 +393,7 @@ func TestMain(m *testing.M) {
 		return
 	}
 
-	cryptoProvider, err := sw.NewDefaultSecurityLevelWithKeystore(sw.NewDummyKeyStore())
+	cryptoProvider, err := sw.NewSM(256, "SHA2", sw.NewDummyKeyStore())
 	if err != nil {
 		fmt.Printf("Initialize cryptoProvider bccsp failed: %s", err)
 		os.Exit(-1)
@@ -406,6 +407,7 @@ func TestMain(m *testing.M) {
 		return
 	}
 	signerMSPId = signer.GetMSPIdentifier()
+	log.Println("signer loaded", signerMSPId)
 
 	signerSerialized, err = signer.Serialize()
 	if err != nil {

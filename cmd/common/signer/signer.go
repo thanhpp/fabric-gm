@@ -11,8 +11,10 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"encoding/asn1"
+	"encoding/hex"
 	"encoding/pem"
 	"io/ioutil"
+	"log"
 	"math/big"
 	"strings"
 
@@ -95,6 +97,9 @@ func validateEnrollmentCertificate(b []byte) error {
 
 func (si *Signer) Sign(msg []byte) ([]byte, error) {
 	digest := util.ComputeSHA256(msg)
+
+	log.Println("signing here", hex.EncodeToString(digest))
+
 	return signECDSA(si.key, digest)
 }
 

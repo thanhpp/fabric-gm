@@ -9,6 +9,7 @@ package msp
 import (
 	"encoding/pem"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -171,6 +172,8 @@ func GetLocalMspConfig(dir string, bccspConfig *factory.FactoryOpts, ID string) 
 	signcertDir := filepath.Join(dir, signcerts)
 	keystoreDir := filepath.Join(dir, keystore)
 	bccspConfig = SetupBCCSPKeystoreConfig(bccspConfig, keystoreDir)
+
+	log.Println("GetLocalMspConfig", "signcertDir", signcertDir, "keystoreDir", keystoreDir)
 
 	err := factory.InitFactories(bccspConfig)
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/m4ru1/fabric-gm-bdais/bccsp"
 	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/x509"
@@ -24,6 +25,7 @@ func (k *SM2PrivateKey) Bytes() ([]byte, error) {
 
 // SKI returns the subject key identifier of this key.
 func (k *SM2PrivateKey) SKI() []byte {
+	log.Println("SM2PrivateKey", "SKI")
 	if k.privKey == nil {
 		return nil
 	}
@@ -71,6 +73,8 @@ func (k *SM2PublicKey) Bytes() (raw []byte, err error) {
 
 // SKI returns the subject key identifier of this key.
 func (k *SM2PublicKey) SKI() []byte {
+	log.Println("SM2PublicKey", "SKI")
+
 	if k.pubKey == nil {
 		return nil
 	}

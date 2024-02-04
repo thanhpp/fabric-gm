@@ -3,6 +3,7 @@ package sw
 import (
 	"crypto/sha256"
 	"errors"
+	"log"
 
 	"github.com/m4ru1/fabric-gm-bdais/bccsp"
 )
@@ -24,6 +25,8 @@ func (k *sm4PrivateKey) Bytes() (raw []byte, err error) {
 
 // SKI returns the subject key identifier of this key.
 func (k *sm4PrivateKey) SKI() (ski []byte) {
+	log.Println("sm4PrivateKey", "SKI")
+
 	hash := sha256.New()
 	hash.Write([]byte{0x11})
 	hash.Write(k.privKey)

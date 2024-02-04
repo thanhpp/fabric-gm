@@ -10,6 +10,7 @@ import (
 	"crypto/elliptic"
 	"crypto/sha256"
 	"crypto/sha512"
+	"log"
 	"reflect"
 
 	"github.com/m4ru1/fabric-gm-bdais/bccsp"
@@ -127,6 +128,8 @@ func NewSM(securityLevel int, hashFamily string, keyStore bccsp.KeyStore) (bccsp
 		return nil, err
 	}
 
+	log.Println("NewSM created")
+
 	// Notice that errors are ignored here because some test will fail if one
 	// of the following call fails.
 
@@ -142,8 +145,6 @@ func NewSM(securityLevel int, hashFamily string, keyStore bccsp.KeyStore) (bccsp
 	swbccsp.AddWrapper(reflect.TypeOf(&SM2PrivateKey{}), &sm2Signer{})
 
 	// Set the Verifiers
-	swbccsp.AddWrapper(reflect.TypeOf(&ecdsaPrivateKey{}), &ecdsaPrivateKeyVerifier{})
-	swbccsp.AddWrapper(reflect.TypeOf(&ecdsaPublicKey{}), &ecdsaPublicKeyKeyVerifier{})
 	swbccsp.AddWrapper(reflect.TypeOf(&SM2PrivateKey{}), &sm2PrivateKeyVerifier{})
 	swbccsp.AddWrapper(reflect.TypeOf(&SM2PublicKey{}), &sm2PublicKeyVerifier{})
 

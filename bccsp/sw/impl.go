@@ -16,7 +16,9 @@ limitations under the License.
 package sw
 
 import (
+	"encoding/hex"
 	"hash"
+	"log"
 	"reflect"
 
 	"github.com/m4ru1/fabric-gm-bdais/bccsp"
@@ -165,6 +167,8 @@ func (csp *CSP) KeyImport(raw interface{}, opts bccsp.KeyImportOpts) (k bccsp.Ke
 // GetKey returns the key this CSP associates to
 // the Subject Key Identifier ski.
 func (csp *CSP) GetKey(ski []byte) (k bccsp.Key, err error) {
+	log.Println("\n GetKey", hex.EncodeToString(ski))
+
 	k, err = csp.ks.GetKey(ski)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed getting key for SKI [%v]", ski)

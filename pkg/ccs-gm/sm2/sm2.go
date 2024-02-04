@@ -8,7 +8,9 @@ package sm2
 import (
 	"crypto"
 	"crypto/elliptic"
+	"encoding/hex"
 	"io"
+	"log"
 	"math/big"
 
 	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/sm3"
@@ -208,6 +210,8 @@ func Verify(pub *PublicKey, msg []byte, r, s *big.Int) bool {
 	c := pub.Curve
 	N := c.Params().N
 
+	log.Println("sm2 verify", pub.Curve.Params(), hex.EncodeToString(msg))
+
 	if r.Sign() <= 0 || s.Sign() <= 0 {
 		return false
 	}
@@ -215,30 +219,67 @@ func Verify(pub *PublicKey, msg []byte, r, s *big.Int) bool {
 		return false
 	}
 
-	n := c.Params().N
+	// n := c.Params().N
 
-	var m = make([]byte, 32+len(msg))
-	copy(m, getZ(pub))
-	copy(m[32:], msg)
-	//h := sm3.New()
-	//hash := h.Sum(m)
-	hash := sm3.SumSM3(m)
-	e := new(big.Int).SetBytes(hash[:])
+	// var m = make([]byte, 32+len(msg))
+	// copy(m, getZ(pub))
+	// copy(m[32:], msg)
+	// //h := sm3.New()
+	// //hash := h.Sum(m)
+	// hash := sm3.SumSM3(m)
+	// e := new(big.Int).SetBytes(hash[:])
 
-	t := new(big.Int).Add(r, s)
+	// t := new(big.Int).Add(r, s)
 
-	// Check if implements S1*g + S2*p
-	//Using fast multiplication CombinedMult.
-	var x1 *big.Int
+	// // Check if implements S1*g + S2*p
+	// //Using fast multiplication CombinedMult.
+	// var x1 *big.Int
 
-	x11, y11 := c.ScalarMult(pub.X, pub.Y, t.Bytes())
-	x12, y12 := c.ScalarBaseMult(s.Bytes())
-	x1, _ = c.Add(x11, y11, x12, y12)
+	// x11, y11 := c.ScalarMult(pub.X, pub.Y, t.Bytes())
+	// x12, y12 := c.ScalarBaseMult(s.Bytes())
+	// x1, _ = c.Add(x11, y11, x12, y12)
 
-	e.Add(e, x1)
-	e.Mod(e, n)
+	// e.Add(e, x1)
+	// e.Mod(e, n)
 
-	return e.Cmp(r) == 0
+	// return e.Cmp(r) == 0
+
+	// SEC 1, Version 2.0, Section 4.1.4
+	e := hashToInt(msg, c)
+	w := new(big.Int).ModInverse(s, N)
+
+	u1 := e.Mul(e, w)
+	u1.Mod(u1, N)
+	u2 := w.Mul(r, w)
+	u2.Mod(u2, N)
+
+	x1, y1 := c.ScalarBaseMult(u1.Bytes())
+	x2, y2 := c.ScalarMult(pub.X, pub.Y, u2.Bytes())
+	x, y := c.Add(x1, y1, x2, y2)
+
+	if x.Sign() == 0 && y.Sign() == 0 {
+		return false
+	}
+	x.Mod(x, N)
+	return true
+}
+
+// hashToInt converts a hash value to an integer. Per FIPS 186-4, Section 6.4,
+// we use the left-most bits of the hash to match the bit-length of the order of
+// the curve. This also performs Step 5 of SEC 1, Version 2.0, Section 4.1.3.
+func hashToInt(hash []byte, c elliptic.Curve) *big.Int {
+	orderBits := c.Params().N.BitLen()
+	orderBytes := (orderBits + 7) / 8
+	if len(hash) > orderBytes {
+		hash = hash[:orderBytes]
+	}
+
+	ret := new(big.Int).SetBytes(hash)
+	excess := len(hash)*8 - orderBits
+	if excess > 0 {
+		ret.Rsh(ret, uint(excess))
+	}
+	return ret
 }
 
 func VerifyWithDigest(pub *PublicKey, digest []byte, r, s *big.Int) bool {

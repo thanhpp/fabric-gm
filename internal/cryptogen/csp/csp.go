@@ -13,13 +13,14 @@ import (
 	"encoding/pem"
 	"io"
 	"io/ioutil"
+	"log"
 	"math/big"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/Hyperledger-TWGC/ccs-gm/sm2"
-	"github.com/Hyperledger-TWGC/ccs-gm/x509"
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/sm2"
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/x509"
 
 	"github.com/pkg/errors"
 )
@@ -76,6 +77,7 @@ func parsePrivateKeyPEM(rawKey []byte) (*sm2.PrivateKey, error) {
 // GeneratePrivateKey creates an EC private key using a P-256 curve and stores
 // it in keystorePath.
 func GeneratePrivateKey(keystorePath string) (*sm2.PrivateKey, error) {
+	log.Println("csp GeneratePrivateKey", keystorePath)
 	priv, err := sm2.GenerateKey(rand.Reader)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to generate private key")
@@ -89,6 +91,14 @@ func GeneratePrivateKey(keystorePath string) (*sm2.PrivateKey, error) {
 	pemEncoded := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: pkcs8Encoded})
 
 	keyFile := filepath.Join(keystorePath, "priv_sk")
+	log.Println("GeneratePrivateKey", "keyFile1", keyFile)
+	err = ioutil.WriteFile(keyFile, pemEncoded, 0o600)
+	if err != nil {
+		return nil, errors.WithMessagef(err, "failed to save private key to file %s", keyFile)
+	}
+
+	keyFile = filepath.Join(keystorePath, "priv_sk.pem")
+	log.Println("GeneratePrivateKey", "keyFile2", keyFile)
 	err = ioutil.WriteFile(keyFile, pemEncoded, 0o600)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "failed to save private key to file %s", keyFile)

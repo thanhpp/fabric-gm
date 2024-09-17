@@ -3,26 +3,29 @@ package sw
 import (
 	"crypto/elliptic"
 	"crypto/sha256"
-	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"errors"
 	"fmt"
+	"log"
 
-	"github.com/Hyperledger-TWGC/ccs-gm/sm2"
 	"github.com/m4ru1/fabric-gm-bdais/bccsp"
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/x509"
+
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/sm2"
 )
 
-type sm2PrivateKey struct {
+type SM2PrivateKey struct {
 	privKey *sm2.PrivateKey
 }
 
 // Bytes converts this key to its byte representation,
 // if this operation is allowed.
-func (k *sm2PrivateKey) Bytes() ([]byte, error) {
+func (k *SM2PrivateKey) Bytes() ([]byte, error) {
 	return nil, errors.New("Not supported.")
 }
 
 // SKI returns the subject key identifier of this key.
-func (k *sm2PrivateKey) SKI() []byte {
+func (k *SM2PrivateKey) SKI() []byte {
+	log.Println("SM2PrivateKey", "SKI")
 	if k.privKey == nil {
 		return nil
 	}
@@ -38,29 +41,29 @@ func (k *sm2PrivateKey) SKI() []byte {
 
 // Symmetric returns true if this key is a symmetric key,
 // false if this key is asymmetric
-func (k *sm2PrivateKey) Symmetric() bool {
+func (k *SM2PrivateKey) Symmetric() bool {
 	return false
 }
 
 // Private returns true if this key is a private key,
 // false otherwise.
-func (k *sm2PrivateKey) Private() bool {
+func (k *SM2PrivateKey) Private() bool {
 	return true
 }
 
 // PublicKey returns the corresponding public key part of an asymmetric public/private key pair.
 // This method returns an error in symmetric key schemes.
-func (k *sm2PrivateKey) PublicKey() (bccsp.Key, error) {
-	return &sm2PublicKey{&k.privKey.PublicKey}, nil
+func (k *SM2PrivateKey) PublicKey() (bccsp.Key, error) {
+	return &SM2PublicKey{&k.privKey.PublicKey}, nil
 }
 
-type sm2PublicKey struct {
+type SM2PublicKey struct {
 	pubKey *sm2.PublicKey
 }
 
 // Bytes converts this key to its byte representation,
 // if this operation is allowed.
-func (k *sm2PublicKey) Bytes() (raw []byte, err error) {
+func (k *SM2PublicKey) Bytes() (raw []byte, err error) {
 	raw, err = x509.MarshalPKIXPublicKey(k.pubKey)
 	if err != nil {
 		return nil, fmt.Errorf("Failed marshalling key [%s]", err)
@@ -69,7 +72,9 @@ func (k *sm2PublicKey) Bytes() (raw []byte, err error) {
 }
 
 // SKI returns the subject key identifier of this key.
-func (k *sm2PublicKey) SKI() []byte {
+func (k *SM2PublicKey) SKI() []byte {
+	log.Println("SM2PublicKey", "SKI")
+
 	if k.pubKey == nil {
 		return nil
 	}
@@ -85,18 +90,18 @@ func (k *sm2PublicKey) SKI() []byte {
 
 // Symmetric returns true if this key is a symmetric key,
 // false if this key is asymmetric
-func (k *sm2PublicKey) Symmetric() bool {
+func (k *SM2PublicKey) Symmetric() bool {
 	return false
 }
 
 // Private returns true if this key is a private key,
 // false otherwise.
-func (k *sm2PublicKey) Private() bool {
+func (k *SM2PublicKey) Private() bool {
 	return false
 }
 
 // PublicKey returns the corresponding public key part of an asymmetric public/private key pair.
 // This method returns an error in symmetric key schemes.
-func (k *sm2PublicKey) PublicKey() (bccsp.Key, error) {
+func (k *SM2PublicKey) PublicKey() (bccsp.Key, error) {
 	return k, nil
 }

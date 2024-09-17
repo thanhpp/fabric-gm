@@ -13,6 +13,8 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/sm2"
 )
 
 type ECDSASignature struct {
@@ -28,6 +30,7 @@ var curveHalfOrders = map[elliptic.Curve]*big.Int{
 	elliptic.P256(): new(big.Int).Rsh(elliptic.P256().Params().N, 1),
 	elliptic.P384(): new(big.Int).Rsh(elliptic.P384().Params().N, 1),
 	elliptic.P521(): new(big.Int).Rsh(elliptic.P521().Params().N, 1),
+	sm2.P256():      new(big.Int).Rsh(sm2.P256().Params().N, 1),
 }
 
 func GetCurveHalfOrdersAt(c elliptic.Curve) *big.Int {
@@ -82,7 +85,7 @@ func SignatureToLowS(k *ecdsa.PublicKey, signature []byte) ([]byte, error) {
 func IsLowS(k *ecdsa.PublicKey, s *big.Int) (bool, error) {
 	halfOrder, ok := curveHalfOrders[k.Curve]
 	if !ok {
-		return false, fmt.Errorf("curve not recognized [%s]", k.Curve)
+		return false, fmt.Errorf("IsLowS curve not recognized [%+v]", k.Curve)
 	}
 
 	return s.Cmp(halfOrder) != 1, nil

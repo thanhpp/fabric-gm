@@ -9,12 +9,14 @@ package msp
 import (
 	"crypto"
 	"crypto/rand"
-	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"encoding/hex"
 	"encoding/pem"
 	"fmt"
+	"log"
 	"sync"
 	"time"
+
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/x509"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric-protos-go/msp"
@@ -134,6 +136,7 @@ func (id *identity) GetOrganizationalUnits() []*OUIdentifier {
 	}
 
 	var res []*OUIdentifier
+	log.Println("GetOrganizationalUnits id.cert.Subject.OrganizationalUnit", id.cert.Subject.OrganizationalUnit)
 	for _, unit := range id.cert.Subject.OrganizationalUnit {
 		res = append(res, &OUIdentifier{
 			OrganizationalUnitIdentifier: unit,

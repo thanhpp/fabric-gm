@@ -10,12 +10,15 @@ import (
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/rand"
-	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"encoding/asn1"
+	"encoding/hex"
 	"encoding/pem"
 	"io/ioutil"
+	"log"
 	"math/big"
 	"strings"
+
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/x509"
 
 	"github.com/hyperledger/fabric-protos-go/msp"
 	"github.com/m4ru1/fabric-gm-bdais/bccsp/utils"
@@ -94,6 +97,9 @@ func validateEnrollmentCertificate(b []byte) error {
 
 func (si *Signer) Sign(msg []byte) ([]byte, error) {
 	digest := util.ComputeSHA256(msg)
+
+	log.Println("signing here", hex.EncodeToString(digest))
+
 	return signECDSA(si.key, digest)
 }
 

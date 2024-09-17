@@ -6,10 +6,12 @@ SPDX-License-Identifier: Apache-2.0
 package msp
 
 import (
-	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"encoding/pem"
+	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/x509"
 
 	"github.com/m4ru1/fabric-gm-bdais/internal/cryptogen/ca"
 	"github.com/m4ru1/fabric-gm-bdais/internal/cryptogen/csp"
@@ -48,6 +50,14 @@ func GenerateLocalMSP(
 	nodeType int,
 	nodeOUs bool,
 ) error {
+	log.Println("GenerateLocalMSP",
+		baseDir,
+		name,
+		sans,
+		signCA,
+		tlsCA,
+		nodeType,
+		nodeOUs)
 	// create folder structure
 	mspDir := filepath.Join(baseDir, "msp")
 	tlsDir := filepath.Join(baseDir, "tls")
@@ -91,6 +101,7 @@ func GenerateLocalMSP(
 	if err != nil {
 		return err
 	}
+	log.Println("SignCertificate", "name", name, "ous", ous, "x509.KeyUsageDigitalSignature", x509.KeyUsageDigitalSignature)
 
 	// write artifacts to MSP folders
 
@@ -232,6 +243,7 @@ func GenerateVerifyingMSP(
 	if err != nil {
 		return err
 	}
+	
 	_, err = signCA.SignCertificate(
 		filepath.Join(baseDir, "admincerts"),
 		signCA.Name,
@@ -280,6 +292,7 @@ func x509Export(path string, cert *x509.Certificate) error {
 }
 
 func keyExport(keystore, output string) error {
+	log.Println("keyExport", keystore, output)
 	return os.Rename(filepath.Join(keystore, "priv_sk"), output)
 }
 

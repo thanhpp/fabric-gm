@@ -10,15 +10,15 @@ import (
 	"crypto/ecdsa"
 	"crypto/rsa"
 
-	//"github.com/Hyperledger-TWGC/ccs-gm/x509"
+	//"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/x509"
 	"errors"
 	"fmt"
 	"reflect"
 
-	"github.com/Hyperledger-TWGC/ccs-gm/sm2"
-	"github.com/Hyperledger-TWGC/ccs-gm/utils"
-	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"github.com/m4ru1/fabric-gm-bdais/bccsp"
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/sm2"
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/utils"
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/x509"
 )
 
 type aes256ImportKeyOptsKeyImporter struct{}
@@ -138,11 +138,10 @@ func (ki *x509PublicKeyImportOptsKeyImporter) KeyImport(raw interface{}, opts bc
 		// authorities to issue ECDSA certificates.
 		return &rsaPublicKey{pubKey: pk}, nil
 	case *sm2.PublicKey:
-		// 思路就是通过反射找到对应的导入器，对该密钥内容进行导入
-		return ki.bccsp.KeyImporters[reflect.TypeOf(&bccsp.SM2PublicKeyImportOpts{})].KeyImport(pk, &bccsp.SM2PublicKeyImportOpts{Temporary: opts.Ephemeral()})
+		return &SM2PublicKey{pubKey: pk}, nil
 	case *sm2.PrivateKey:
 		// 思路就是通过反射找到对应的导入器，对该密钥内容进行导入
-		return ki.bccsp.KeyImporters[reflect.TypeOf(&bccsp.SM2PrivateKeyImportOpts{})].KeyImport(pk, &bccsp.SM2PrivateKeyImportOpts{Temporary: opts.Ephemeral()})
+		return &SM2PrivateKey{privKey: pk}, nil
 	default:
 		return nil, errors.New("Certificate's public key type not recognized. Supported keys: [ECDSA, RSA]")
 	}
@@ -173,15 +172,15 @@ func (*sm2PrivateKeyOptsKeyImporter) KeyImport(raw interface{}, opts bccsp.KeyIm
 		return nil, errors.New("Invalid raw material, Expected byte array")
 	}
 	// 密钥长度判断
-	if len(der) != 0 {
-		return nil, errors.New("Invalid raw material, It must botbe nil")
+	if len(der) == 0 {
+		return nil, errors.New("Invalid raw material, It must not be nil")
 	}
 	key, err := utils.PEMtoPrivateKey(der, nil)
 	// 密钥导入结果判断
 	if err != nil {
 		return nil, errors.New("Failed converting to GMSM2 private key")
 	}
-	return &sm2PrivateKey{key}, nil
+	return &SM2PrivateKey{key}, nil
 }
 
 type sm2PublicKeyOptsKeyImporter struct{}
@@ -193,13 +192,13 @@ func (*sm2PublicKeyOptsKeyImporter) KeyImport(raw interface{}, opts bccsp.KeyImp
 		return nil, errors.New("Invalid raw material, Expected byte array")
 	}
 	// 密钥长度判断
-	if len(der) != 0 {
-		return nil, errors.New("Invalid raw material, It must botbe nil")
+	if len(der) == 0 {
+		return nil, errors.New("Invalid raw material, It must not be nil")
 	}
 	key, err := utils.PEMtoPublicKey(der, nil)
 	// 密钥导入结果判断
 	if err != nil {
 		return nil, errors.New("Failed converting to GMSM2 public key")
 	}
-	return &sm2PublicKey{key}, nil
+	return &SM2PublicKey{key}, nil
 }

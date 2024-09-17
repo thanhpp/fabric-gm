@@ -17,9 +17,11 @@ package pkcs11
 
 import (
 	"crypto/ecdsa"
-	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"errors"
 	"fmt"
+	"log"
+
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/x509"
 
 	"github.com/m4ru1/fabric-gm-bdais/bccsp"
 )
@@ -37,6 +39,8 @@ func (k *ecdsaPrivateKey) Bytes() ([]byte, error) {
 
 // SKI returns the subject key identifier of this key.
 func (k *ecdsaPrivateKey) SKI() []byte {
+	log.Println("ecdsaPrivateKey", "SKI")
+
 	return k.ski
 }
 
@@ -75,6 +79,8 @@ func (k *ecdsaPublicKey) Bytes() (raw []byte, err error) {
 
 // SKI returns the subject key identifier of this key.
 func (k *ecdsaPublicKey) SKI() []byte {
+	log.Println("ecdsaPublicKey", "SKI")
+
 	return k.ski
 }
 

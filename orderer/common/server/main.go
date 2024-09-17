@@ -11,6 +11,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	_ "net/http/pprof" // This is essentially the main package for the orderer
@@ -92,7 +93,7 @@ func Main() {
 
 	signer, signErr := loadLocalMSP(conf).GetDefaultSigningIdentity()
 	if signErr != nil {
-		logger.Panicf("Failed to get local MSP identity: %s", signErr)
+		logger.Panicf("Failed to get local MSP identity: %s, %+v", signErr, conf)
 	}
 
 	opsSystem := newOperationsSystem(conf.Operations, conf.Metrics)
@@ -760,7 +761,7 @@ func loadLocalMSP(conf *localconfig.TopLevel) msp.MSP {
 	// initialized prior to LoadByType.
 	mspConfig, err := msp.GetLocalMspConfig(conf.General.LocalMSPDir, conf.General.BCCSP, conf.General.LocalMSPID)
 	if err != nil {
-		logger.Panicf("Failed to get local msp config: %v", err)
+		logger.Panicf("Failed to get local msp config: %v, conf: %+v", err, conf)
 	}
 
 	typ := msp.ProviderTypeToString(msp.FABRIC)
@@ -774,8 +775,10 @@ func loadLocalMSP(conf *localconfig.TopLevel) msp.MSP {
 		logger.Panicf("Failed to load local MSP: %v", err)
 	}
 
+	log.Println("loadLocalMSP", mspConfig)
+
 	if err = localmsp.Setup(mspConfig); err != nil {
-		logger.Panicf("Failed to setup local msp with config: %v", err)
+		logger.Panicf("Failed to setup local msp with config: %v, %+v", err, mspConfig)
 	}
 
 	return localmsp

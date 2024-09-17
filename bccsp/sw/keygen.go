@@ -23,8 +23,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/Hyperledger-TWGC/ccs-gm/sm2"
 	"github.com/m4ru1/fabric-gm-bdais/bccsp"
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/sm2"
 )
 
 type ecdsaKeyGenerator struct {
@@ -60,7 +60,7 @@ func (kg *sm2KeyGenerator) KeyGen(opts bccsp.KeyGenOpts) (bccsp.Key, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &sm2PrivateKey{priv}, nil
+	return &SM2PrivateKey{priv}, nil
 }
 
 type sm4KeyGenerator struct{}

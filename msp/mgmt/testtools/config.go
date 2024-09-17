@@ -7,6 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 package msptesttools
 
 import (
+	"log"
+
 	"github.com/m4ru1/fabric-gm-bdais/bccsp/factory"
 	"github.com/m4ru1/fabric-gm-bdais/core/config/configtest"
 	"github.com/m4ru1/fabric-gm-bdais/msp"
@@ -21,6 +23,9 @@ func LoadMSPSetupForTesting() error {
 	if err != nil {
 		return err
 	}
+	log.Println("LoadMSPSetupForTesting", "dir", dir)
+
+	log.Println("load msp setup for testing", "conf", conf)
 
 	err = mgmt.GetLocalMSP(factory.GetDefault()).Setup(conf)
 	if err != nil {

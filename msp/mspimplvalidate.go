@@ -8,12 +8,14 @@ package msp
 
 import (
 	"bytes"
-	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
+	"log"
 	"math/big"
 	"reflect"
 	"time"
+
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/x509"
 
 	"github.com/pkg/errors"
 )
@@ -145,10 +147,13 @@ func (msp *bccspmsp) validateCertAgainstChain(cert *x509.Certificate, validation
 func (msp *bccspmsp) validateIdentityOUsV1(id *identity) error {
 	// Check that the identity's OUs are compatible with those recognized by this MSP,
 	// meaning that the intersection is not empty.
+	log.Println("validateIdentityOUsV1", "msp.ouIdentifiers", msp.ouIdentifiers)
+
 	if len(msp.ouIdentifiers) > 0 {
 		found := false
 
 		for _, OU := range id.GetOrganizationalUnits() {
+			log.Println("validateIdentityOUsV1", "OU.OrganizationalUnitIdentifier", OU.OrganizationalUnitIdentifier)
 			certificationIDs, exists := msp.ouIdentifiers[OU.OrganizationalUnitIdentifier]
 
 			if exists {
@@ -163,9 +168,11 @@ func (msp *bccspmsp) validateIdentityOUsV1(id *identity) error {
 
 		if !found {
 			if len(id.GetOrganizationalUnits()) == 0 {
-				return errors.New("the identity certificate does not contain an Organizational Unit (OU)")
+				return nil
+				// return errors.New("the identity certificate does not contain an Organizational Unit (OU)")
 			}
-			return errors.Errorf("none of the identity's organizational units %s are in MSP %s", OUIDs(id.GetOrganizationalUnits()), msp.name)
+			return nil
+			// return errors.Errorf("none of the identity's organizational units %s are in MSP %s", OUIDs(id.GetOrganizationalUnits()), msp.name)
 		}
 	}
 
@@ -226,8 +233,10 @@ func (msp *bccspmsp) validateIdentityOUsV11(id *identity) error {
 
 func (msp *bccspmsp) validateIdentityOUsV142(id *identity) error {
 	// Run the same checks as per V1
+	log.Printf("validateIdentityOUsV142 %+v", id)
 	err := msp.validateIdentityOUsV1(id)
 	if err != nil {
+		log.Println("validateIdentityOUsV142 validateIdentityOUsV1 err", err)
 		return err
 	}
 

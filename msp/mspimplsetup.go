@@ -8,11 +8,13 @@ package msp
 
 import (
 	"bytes"
-	"github.com/Hyperledger-TWGC/ccs-gm/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"fmt"
+	"log"
 	"time"
+
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/x509"
 
 	"github.com/golang/protobuf/proto"
 	m "github.com/hyperledger/fabric-protos-go/msp"
@@ -396,6 +398,8 @@ func (msp *bccspmsp) setupNodeOUsV142(config *m.FabricMSPConfig) error {
 }
 
 func (msp *bccspmsp) setupSigningIdentity(conf *m.FabricMSPConfig) error {
+	log.Println("setupSigningIdentity", conf)
+
 	if conf.SigningIdentity != nil {
 		sid, err := msp.getSigningIdentityFromConf(conf.SigningIdentity)
 		if err != nil {
@@ -562,6 +566,8 @@ func (msp *bccspmsp) preSetupV1(conf *m.FabricMSPConfig) error {
 
 func (msp *bccspmsp) preSetupV142(conf *m.FabricMSPConfig) error {
 	// setup crypto config
+	log.Println("preSetupV142", conf)
+
 	if err := msp.setupCrypto(conf); err != nil {
 		return err
 	}
@@ -643,6 +649,8 @@ func (msp *bccspmsp) setupV11(conf *m.FabricMSPConfig) error {
 }
 
 func (msp *bccspmsp) setupV142(conf *m.FabricMSPConfig) error {
+	log.Println("\n\n setupV142")
+
 	err := msp.preSetupV142(conf)
 	if err != nil {
 		return err

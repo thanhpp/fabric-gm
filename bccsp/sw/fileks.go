@@ -14,14 +14,15 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 
-	"github.com/Hyperledger-TWGC/ccs-gm/sm2"
-	"github.com/Hyperledger-TWGC/ccs-gm/utils"
 	"github.com/m4ru1/fabric-gm-bdais/bccsp"
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/sm2"
+	"github.com/m4ru1/fabric-gm-bdais/pkg/ccs-gm/utils"
 )
 
 // NewFileBasedKeyStore instantiated a file-based key store at a given position.
@@ -124,6 +125,7 @@ func (ks *fileBasedKeyStore) GetKey(ski []byte) (bccsp.Key, error) {
 	}
 
 	suffix := ks.getSuffix(hex.EncodeToString(ski))
+	log.Println("GetKey suffix", suffix)
 
 	switch suffix {
 	case "key":
@@ -161,7 +163,11 @@ func (ks *fileBasedKeyStore) GetKey(ski []byte) (bccsp.Key, error) {
 			return nil, errors.New("public key type not recognized")
 		}
 	default:
-		return ks.searchKeystoreForSKI(ski)
+		k, err := ks.searchKeystoreForSKI(ski)
+
+		log.Println("searchKeystoreForSKI", k, err)
+
+		return k, err
 	}
 }
 
@@ -198,12 +204,12 @@ func (ks *fileBasedKeyStore) StoreKey(k bccsp.Key) (err error) {
 		if err != nil {
 			return fmt.Errorf("failed storing SM4 key [%s]", err)
 		}
-	case *sm2PrivateKey:
+	case *SM2PrivateKey:
 		err = ks.gmStorePrivateKey(hex.EncodeToString(k.SKI()), kk.privKey)
 		if err != nil {
 			return fmt.Errorf("failed storing SM2 private key [%s]", err)
 		}
-	case *sm2PublicKey:
+	case *SM2PublicKey:
 		err = ks.gmStorePublicKey(hex.EncodeToString(k.SKI()), kk.pubKey)
 		if err != nil {
 			return fmt.Errorf("failed storing SM2 private key [%s]", err)
@@ -219,6 +225,8 @@ func (ks *fileBasedKeyStore) StoreKey(k bccsp.Key) (err error) {
 func (ks *fileBasedKeyStore) searchKeystoreForSKI(ski []byte) (k bccsp.Key, err error) {
 	files, _ := ioutil.ReadDir(ks.path)
 	for _, f := range files {
+		log.Println("searchKeystoreForSKI", f.Name())
+
 		if f.IsDir() {
 			continue
 		}
@@ -240,7 +248,10 @@ func (ks *fileBasedKeyStore) searchKeystoreForSKI(ski []byte) (k bccsp.Key, err 
 		switch kk := key.(type) {
 		case *ecdsa.PrivateKey:
 			k = &ecdsaPrivateKey{kk}
+		case *sm2.PrivateKey:
+			k = &SM2PrivateKey{kk}
 		default:
+			log.Printf("searchKeystoreForSKI kk %T", key)
 			continue
 		}
 

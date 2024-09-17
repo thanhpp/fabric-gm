@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package factory
 
 import (
+	"log"
 	"sync"
 
 	"github.com/m4ru1/fabric-gm-bdais/bccsp"
@@ -40,6 +41,7 @@ type BCCSPFactory interface {
 
 // GetDefault returns a non-ephemeral (long-term) BCCSP
 func GetDefault() bccsp.BCCSP {
+	log.Println("GetDefault BCCSP")
 	if defaultBCCSP == nil {
 		logger.Debug("Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.")
 		bootBCCSPInitOnce.Do(func() {
